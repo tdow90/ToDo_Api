@@ -1,12 +1,36 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import generics, permissions
 from .models import Todo
 from .serializers import ToDoSerializer
-#from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 # Create your views here.
-# Didn't add, but could just add LoginRequiredMixin, this would only show page if you are logedIn. Also, should filter only specific users Todo's 
-class ToDoView(viewsets.ModelViewSet):
-    queryset = Todo.objects.all()
+#List all Todo objects that are from a specific user
+class ToDoView(generics.ListCreateAPIView):
     serializer_class = ToDoSerializer
+    queryset = Todo.objects.all()
 
+    def get_queryset(self):
+        # Optionally filter the queryset based on the user
+        user = self.request.user
+        return Todo.objects.filter(user=user, completed=False).order_by('due_date')
+    
+#List all Todo's that are completed
+class CompleteToDoView(generics.ListCreateAPIView):
+    serializer_class = ToDoSerializer
+    queryset = Todo.objects.all()
+
+    def get_queryset(self):
+        # Optionally filter the queryset based on the user
+        user = self.request.user
+        return Todo.objects.filter(user=user, completed=True).order_by('-created_date')
+
+# Class to update or delete, only for the user.
+class ToDoUpdate(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ToDoSerializer
+    queryset = Todo.objects.all()
+
+    def get_queryset(self):
+        # Optionally filter the queryset based on the user
+        user = self.request.user
+        return Todo.objects.filter(user=user)

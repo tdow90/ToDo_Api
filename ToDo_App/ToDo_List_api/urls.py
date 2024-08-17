@@ -1,10 +1,9 @@
 from django.urls import path, include
 from . import views
-from rest_framework import routers
-
-router = routers.DefaultRouter()
-router.register('todo', views.ToDoView)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', views.ToDoView.as_view()),
+    path('<int:pk>/', views.ToDoUpdate.as_view()),
+    path('completed/', views.CompleteToDoView.as_view())
 ]
+
